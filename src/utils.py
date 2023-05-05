@@ -1,7 +1,8 @@
 import pygame
 # Images
-STONE = pygame.image.load("img/stone-32_2.png")
+STONE = pygame.image.load("img/stone-32.png")
 BOMB = pygame.image.load("img/bomb-32.png")
+BARREL = pygame.image.load("img/barrel-32.png")
 # End Images
 
 def draw_pixels(WINDOW,file_location):
@@ -16,6 +17,8 @@ def draw_pixels(WINDOW,file_location):
                     WINDOW.blit(STONE,(x, y))
                 if id == "2":
                     WINDOW.blit(BOMB, (x, y))
+                if id == "3":
+                    WINDOW.blit(BARREL, (x, y))
                 x += resolution
             
             x = 0
