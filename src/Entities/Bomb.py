@@ -9,14 +9,14 @@ class Bomb:
         self.row = row
         self.column = column
         self.counter = 0
-        self.frame_1 = pygame.image.load("img/bomb-32-1.png")
-        self.frame_2 = pygame.image.load("img/bomb-32-2.png")
 
     def draw(self,WINDOW):
+        frame_1 = pygame.image.load("img/bomb-32-1.png")
+        frame_2 = pygame.image.load("img/bomb-32-2.png")
         if self.counter < 10:
-            WINDOW.blit(self.frame_1, (self.x, self.y))
+            WINDOW.blit(frame_1, (self.x, self.y))
         elif  10 <= self.counter < 20:
-            WINDOW.blit(self.frame_2, (self.x, self.y))
+            WINDOW.blit(frame_2, (self.x, self.y))
 
         if self.counter == 20:
             self.counter = 0

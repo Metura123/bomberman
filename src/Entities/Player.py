@@ -7,7 +7,6 @@ class Player:
         self.x = x
         self.y = y
         self.velocity = 2
-        self.image = pygame.image.load("img/barrel-32.png")
         self.collision_area = pygame.rect.Rect(self.x + 6, self.y + 6, 20, 20)
 
     def move(self,obstacles):
@@ -46,4 +45,5 @@ class Player:
         self.collision_area = pygame.rect.Rect(self.x + 6, self.y + 6, 20, 20)
 
     def draw(self,WINDOW):
-        WINDOW.blit(self.image, (self.x, self.y))
+        image = pygame.image.load("img/barrel-32.png")
+        WINDOW.blit(image, (self.x, self.y))
