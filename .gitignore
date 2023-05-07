@@ -1,4 +1,4 @@
 src/__pycache__/*
 src/Entities/__pycache__/*
 aws_ubuntu_instance.sh
-test.py
+src/test.py
