@@ -7,6 +7,7 @@ class Player:
         self.x = x
         self.y = y
         self.velocity = 2
+        self.counter = 0
         self.collision_area = pygame.rect.Rect(self.x + 6, self.y + 6, 20, 20)
 
     def move(self,obstacles):
@@ -45,5 +46,14 @@ class Player:
         self.collision_area = pygame.rect.Rect(self.x + 6, self.y + 6, 20, 20)
 
     def draw(self,WINDOW):
-        image = pygame.image.load("img/barrel-32.png")
-        WINDOW.blit(image, (self.x, self.y))
+        frame_1 = pygame.image.load("img/BombermanT_frame1.png")
+        frame_2 = pygame.image.load("img/BombermanT_frame2.png")
+        if self.counter < 10:
+            WINDOW.blit(frame_1, (self.x, self.y))
+        elif  10 <= self.counter < 20:
+            WINDOW.blit(frame_2, (self.x, self.y))
+
+        if self.counter == 20:
+            self.counter = 0
+        else:
+            self.counter += 1
