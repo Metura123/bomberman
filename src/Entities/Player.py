@@ -1,3 +1,4 @@
+from Entities.Bomb import Bomb
 import pygame
 pygame.init()
 
@@ -9,6 +10,8 @@ class Player:
         self.velocity = 2
         self.counter = 0
         self.collision_area = pygame.rect.Rect(self.x + 6, self.y + 6, 20, 20)
+        self.bomb_timeout = 0
+        self.bomb = 0
 
     def move(self,obstacles):
         keys = pygame.key.get_pressed()
@@ -57,3 +60,15 @@ class Player:
             self.counter = 0
         else:
             self.counter += 1
+
+    def deploy_bomb(self,minimap,obstacles):
+        keys = pygame.key.get_pressed()
+        row = (self.y + 16) // 32
+        column = (self.x + 16) // 32
+        if keys[pygame.K_SPACE] and self.bomb_timeout == 0:
+            self.bomb = Bomb(column * 32, row * 32, row, column)
+            minimap[row][column] = self.bomb
+            self.bomb_timeout += 1
+        if self.bomb_timeout == 240:
+            self.bomb.explode_bomb(minimap,obstacles)
+            self.bomb = 0

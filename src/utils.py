@@ -1,6 +1,7 @@
 from Entities.Stone import Stone
 from Entities.Bomb import Bomb
-import pygame
+from Entities.Barrel import Barrel
+import pygame, struct
 # Images
 STONE = pygame.image.load("img/stone-32.png")
 BOMB = pygame.image.load("img/bomb-32-1.png")
@@ -9,7 +10,8 @@ BARREL = pygame.image.load("img/barrel-32.png")
 # IDs
 EMPTY = "0"
 STONE_ID = "1"
-BOMB_ID = "2"
+BARREL_ID = "2"
+BOMB_ID = "3"
 # End IDs
 
 def init_map(minimap,obstacles, map_file_location):
@@ -32,8 +34,10 @@ def init_map(minimap,obstacles, map_file_location):
                     except:
                         pass
                     to_append.append(stone)
-                if value == BOMB_ID:
-                    to_append.append(Bomb(x, y, row, column))
+                if value == BARREL_ID:
+                    barrel = Barrel(x, y, row, column)
+                    to_append.append(barrel)
+                    obstacles_list.append(barrel.collision_area)
                 
                 x += resolution
             
@@ -51,3 +55,5 @@ def draw_pixels(WINDOW,minimap):
                     entity.draw(WINDOW)
                 except:
                     pass
+
+

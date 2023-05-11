@@ -2,7 +2,7 @@ import pygame
 pygame.init()
 
 class Bomb:
-    id = 2
+    id = 3
     def __init__(self,x,y,row,column):
         self.x = x
         self.y = y
@@ -22,5 +22,35 @@ class Bomb:
             self.counter = 0
         else:
             self.counter += 1
-        
+
+    def explode_bomb(self,minimap,obstacles):
+        try:
+            if minimap[self.row - 1][self.column].id == 2:
+                obstacles.remove(minimap[self.row - 1][self.column].collision_area)
+                minimap[self.row - 1][self.column] = 0
+        except:
+            pass
+
+        try:
+            if minimap[self.row + 1][self.column].id == 2:
+                obstacles.remove(minimap[self.row + 1][self.column].collision_area)
+                minimap[self.row + 1][self.column] = 0
+        except:
+            pass
+
+        try:
+            if minimap[self.row][self.column + 1].id == 2:
+                obstacles.remove(minimap[self.row][self.column + 1].collision_area)
+                minimap[self.row][self.column + 1] = 0
+        except:
+            pass
+
+        try:
+            if minimap[self.row][self.column - 1].id == 2:
+                obstacles.remove(minimap[self.row][self.column - 1].collision_area)
+                minimap[self.row][self.column - 1] = 0
+        except:
+            pass
+
+        minimap[self.row][self.column] = 0
 
