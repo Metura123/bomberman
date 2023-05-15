@@ -10,7 +10,7 @@ class Barrel:
         self.row = row
         self.column = column
         if not self.row == 0 and not self.column == 0 and not self.row == 24 and not self.column == 32: 
-            self.collision_area = pygame.rect.Rect(self.x + 3, self.y + 3, 26, 26)
+            self.collision_area = pygame.rect.Rect(self.x, self.y, 32, 32)
 
     def draw(self,WINDOW):
         image = pygame.image.load("img/barrel-32.png")

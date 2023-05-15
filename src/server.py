@@ -1,4 +1,4 @@
-from utils import init_map
+from utils import init_map, send_data, recv_data
 from Entities.Player import Player
 from Entities.Stone import Stone
 from Entities.Bomb import Bomb
@@ -17,41 +17,15 @@ minimap = []
 obstacles = []
 init_map(minimap, obstacles, "map.txt")
 
-def broadcast(item):
-    for client in connections:
-        to_send = pickle.dumps(item)
-        client.send(struct.pack("I",len(to_send)))
-        client.send(to_send)
-
-def receive_and_send_players(client):
+def recv_send_players(client):
     while True:
-        to_recv = struct.unpack("I", client.recv(4))
-        data = client.recv(to_recv[0])
+        index = connections.index(client)
+        data = recv_data(client)
         if not data:
-            index = connections.index(client)
-            players.pop(index)
-            connections.pop(index)
             client.close()
             break
-        else:
-            to_send = pickle.dumps(players)
-            client.send(struct.pack("I",len(to_send)))
-            client.send(to_send)
-
-def receive_and_send_minimap(client):
-    while True:
-        to_recv = struct.unpack("I", client.recv(4))
-        data = client.recv(to_recv[0])
-        if not data:
-            index = connections.index(client)
-            players.pop(index)
-            connections.pop(index)
-            client.close()
-            break
-        else:
-            to_send = pickle.dumps(minimap)
-            client.send(struct.pack("I",len(to_send)))
-            client.send(to_send)
+        players[index] = pickle.loads(data)
+        send_data(client, players)
 
 def accept_connections():
     while True:
@@ -59,47 +33,36 @@ def accept_connections():
             continue
         client, addr = server.accept()
 
-        client.send(str(len(players)).encode('unicode_escape')) 
-        # Receiving the player object of the created player
-        player = Player(player_locations[len(players)][0],player_locations[len(players)][1])
-        print(player)
+        client.send(str(len(players)).encode("unicode_escape"))
+        player = Player(player_locations[len(players)][0], player_locations[len(players)][1])
         players.append(player)
 
         # Sending the players, minimap and obstacles to the client
-        to_send = pickle.dumps(players)
-        client.send(struct.pack("I",len(to_send)))
-        client.send(to_send)
-        data = client.recv(128).decode('unicode_escape')
-        if not data:
-            print("No data returned after players had sent!")
-            client.close()
-            break
-
-        to_send = pickle.dumps(minimap)
-        client.send(struct.pack("I",len(to_send)))
-        client.send(to_send)
-        data = client.recv(128).decode('unicode_escape')
+        send_data(client, minimap)
+        data = recv_data(client)
         if not data:
             print("No data returned after minimap had sent!")
             client.close()
             break
-        
-        to_send = pickle.dumps(obstacles)
-        client.send(struct.pack("I",len(to_send)))
-        client.send(to_send)
-        data = client.recv(128).decode('unicode_escape')
+
+        send_data(client, obstacles)
+        data = recv_data(client)
         if not data:
             print("No data returned after obstacles had sent!")
             client.close()
             break
 
-        threading.Thread(target=receive_and_send_players,args=(client, )).start()
-        threading.Thread(target=receive_and_send_minimap,args=(client, )).start()
+        send_data(client, players)
+        data = recv_data(client)
+        if not data:
+            print("No data returned after players had sent!")
+            client.close()
+            break
+
         connections.append(client)
+        threading.Thread(target=recv_send_players, args=(client, )).start()
 
 accept_connections()
-
-
 
 server.close()
 print("Bye")

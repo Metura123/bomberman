@@ -1,4 +1,4 @@
-from utils import init_map, draw_pixels
+from utils import init_map, draw_pixels, send_data, recv_data
 from Entities.Stone import Stone
 from Entities.Player import Player
 import pygame, socket, threading, pickle, struct
@@ -18,29 +18,43 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((IP_ADDRESS, PORT))
 # End Multiplayer Socket
 
-player_id = int(client.recv(64).decode('unicode_escape'))
+player_id = int(client.recv(64).decode("unicode_escape"))
 
-# Receiving players, minimap and obstacle
-to_recv = struct.unpack("I", client.recv(4))
-data = client.recv(to_recv[0])
+data = recv_data(client)
 if not data: client.close()
-else: players = pickle.loads(data)
-if len(players) != 0: client.send("SUCCESS".encode('unicode_escape'))
-else: client.close()
+else: 
+    minimap = pickle.loads(data)
+    send_data(client, "SUCCESS")
 
-to_recv = struct.unpack("I", client.recv(4))
-data = client.recv(to_recv[0])
+data = recv_data(client)
 if not data: client.close()
-else: minimap = pickle.loads(data)
-if len(minimap) != 0: client.send("SUCCESS".encode('unicode_escape'))
-else: client.close()
+else: 
+    obstacles = pickle.loads(data)
+    send_data(client, "SUCCESS")
 
-to_recv = struct.unpack("I", client.recv(4))
-data = client.recv(to_recv[0])
+data = recv_data(client)
 if not data: client.close()
-else: obstacles = pickle.loads(data) 
-if len(obstacles) != 0: client.send("SUCCESS".encode('unicode_escape'))
-else: client.close()
+else:
+    players = pickle.loads(data)
+    send_data(client, "SUCCESS")
+
+
+def send_recv_player(player):
+    while True:
+        send_data(client, player)
+        data = recv_data(client)
+        if not data:
+            client.close()
+            break
+        else: 
+            received_player_list = pickle.loads(data)
+            if len(received_player_list) > len(players): players.append(received_player_list[len(received_player_list) - 1])
+            else:
+                for index, value in enumerate(received_player_list):
+                    if index == player_id:
+                        continue
+
+                    players[index] = value
 
 # Pygame Window Initialization
 WIDTH, HEIGHT = 1056, 800           # Screen Resolution
@@ -48,48 +62,28 @@ WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))       # Window Initialization
 pygame.display.set_caption("Bomberman")
 # End Pygame Window Initialization
 
-def send_and_receive_players(players):
-    while True:
-        to_send = pickle.dumps(players)
-        client.send(struct.pack("I",len(to_send)))
-        client.send(to_send)
+threading.Thread(target=send_recv_player,args=(players[player_id],)).start()
 
-        to_recv = struct.unpack("I", client.recv(4))
-        data = client.recv(to_recv[0])
-
-        if not data: client.close()
-        else: players[:] = data
-
-def send_and_receive_minimap(minimap):
-    while True:
-        to_send = pickle.dumps(minimap)
-        client.send(struct.pack("I",len(to_send)))
-        client.send(to_send)
-
-        to_recv = struct.unpack("I", client.recv(4))
-        data = client.recv(to_recv[0])
-
-        if not data: client.close()
-        else: minimap[:] = data
-
-while run: 
+while run:
     clock.tick(60) # Game FPS
-
-    send_and_receive_players(players)
-    send_and_receive_minimap(minimap)
 
     if players[player_id].bomb_timeout != 0:
         players[player_id].bomb_timeout += 1
 
     WINDOW.fill(GREEN)  # Draw window
     draw_pixels(WINDOW, minimap)
-    players[player_id].deploy_bomb(minimap,obstacles)
+    change = players[player_id].deploy_bomb(minimap,obstacles)
+    if change:
+        send_data(client, minimap)
+
     players[player_id].move(obstacles)
+
     for pl in players:
         pl.draw(WINDOW)
 
-    if players[player_id].bomb_timeout == 241:
+    if players[player_id].bomb_timeout == 121:
         players[player_id].bomb_timeout = 0
+        send_data(client, obstacles)
     
     pygame.display.update()
 

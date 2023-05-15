@@ -69,6 +69,7 @@ class Player:
             self.bomb = Bomb(column * 32, row * 32, row, column)
             minimap[row][column] = self.bomb
             self.bomb_timeout += 1
-        if self.bomb_timeout == 240:
+            return True
+        if self.bomb_timeout == 120:
             self.bomb.explode_bomb(minimap,obstacles)
             self.bomb = 0

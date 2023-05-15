@@ -1,7 +1,7 @@
 from Entities.Stone import Stone
 from Entities.Bomb import Bomb
 from Entities.Barrel import Barrel
-import pygame, struct
+import pygame, struct, pickle
 # Images
 STONE = pygame.image.load("img/stone-32.png")
 BOMB = pygame.image.load("img/bomb-32-1.png")
@@ -56,4 +56,12 @@ def draw_pixels(WINDOW,minimap):
                 except:
                     pass
 
+def send_data(client, data):
+    to_send = pickle.dumps(data)
+    client.send(struct.pack("I",len(to_send)))
+    client.send(to_send)
 
+def recv_data(client):
+    to_recv = struct.unpack("I", client.recv(4))
+    data = client.recv(to_recv[0])
+    return data
