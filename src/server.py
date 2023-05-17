@@ -55,6 +55,7 @@ def accept_connections():
 
         connections.append(client)
         threading.Thread(target=recv_send_players, args=(client, )).start()
+        # threading.Thread(target=recv_send_bomb, args=(client, )).start()
 
 accept_connections()
 

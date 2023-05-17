@@ -66,6 +66,7 @@ pygame.display.set_caption("Bomberman")
 # End Pygame Window Initialization
 
 threading.Thread(target=send_recv_player,args=(players[player_id],)).start()
+# threading.Thread(target=recv_bomb).start()
 
 while run:
     clock.tick(60) # Game FPS
@@ -86,7 +87,6 @@ while run:
 
     if players[player_id].bomb_timeout == 121:
         players[player_id].bomb_timeout = 0
-        send_data(client, obstacles)
     
     pygame.display.update()
 
