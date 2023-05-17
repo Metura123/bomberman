@@ -13,9 +13,6 @@ server.bind((IP_ADDRESS, PORT))
 server.listen()
 connections = []
 players = []
-minimap = []
-obstacles = []
-init_map(minimap, obstacles, "map.txt")
 
 def recv_send_players(client):
     while True:
@@ -26,6 +23,17 @@ def recv_send_players(client):
             break
         players[index] = pickle.loads(data)
         send_data(client, players)
+
+def recv_send_bomb(client):
+    while True:
+        data = recv_data(client)
+        if not data:
+            client.close()
+            break
+        for cl in connections:
+            if cl != client: 
+                client.send("B".encode('unicode_escape'))
+                send_data(cl, pickle.loads(data))
 
 def accept_connections():
     while True:
@@ -38,20 +46,6 @@ def accept_connections():
         players.append(player)
 
         # Sending the players, minimap and obstacles to the client
-        send_data(client, minimap)
-        data = recv_data(client)
-        if not data:
-            print("No data returned after minimap had sent!")
-            client.close()
-            break
-
-        send_data(client, obstacles)
-        data = recv_data(client)
-        if not data:
-            print("No data returned after obstacles had sent!")
-            client.close()
-            break
-
         send_data(client, players)
         data = recv_data(client)
         if not data:

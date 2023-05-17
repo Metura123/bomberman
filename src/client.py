@@ -1,12 +1,15 @@
 from utils import init_map, draw_pixels, send_data, recv_data
 from Entities.Stone import Stone
 from Entities.Player import Player
+from Entities.Bomb import Bomb
 import pygame, socket, threading, pickle, struct
 pygame.init()
 
 minimap = []
 obstacles = []
 players = []
+init_map(minimap, obstacles, "map.txt")
+
 run = True  # Game Loop
 clock = pygame.time.Clock() # Game Clock
 GREEN = (0,150,0)
@@ -22,22 +25,22 @@ player_id = int(client.recv(64).decode("unicode_escape"))
 
 data = recv_data(client)
 if not data: client.close()
-else: 
-    minimap = pickle.loads(data)
-    send_data(client, "SUCCESS")
-
-data = recv_data(client)
-if not data: client.close()
-else: 
-    obstacles = pickle.loads(data)
-    send_data(client, "SUCCESS")
-
-data = recv_data(client)
-if not data: client.close()
 else:
     players = pickle.loads(data)
     send_data(client, "SUCCESS")
 
+def recv_bomb():
+    while True:
+        message = client.recv(1).decode('unicode_escape')
+        if message == "B":
+            data = recv_data(client)
+            if not data:
+                client.close()
+                break
+
+            row, column = pickle.loads(data)
+            minimap[row][column] = Bomb(32 * column, 32 * row, row, column)
+        else: continue
 
 def send_recv_player(player):
     while True:
@@ -74,7 +77,7 @@ while run:
     draw_pixels(WINDOW, minimap)
     change = players[player_id].deploy_bomb(minimap,obstacles)
     if change:
-        send_data(client, minimap)
+        send_data(client, change)
 
     players[player_id].move(obstacles)
 

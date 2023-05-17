@@ -9,7 +9,7 @@ class Player:
         self.y = y
         self.velocity = 2
         self.counter = 0
-        self.collision_area = pygame.rect.Rect(self.x + 6, self.y + 6, 20, 20)
+        self.collision_area = pygame.rect.Rect(self.x + 3, self.y + 3, 26, 26)
         self.bomb_timeout = 0
         self.bomb = 0
 
@@ -69,7 +69,7 @@ class Player:
             self.bomb = Bomb(column * 32, row * 32, row, column)
             minimap[row][column] = self.bomb
             self.bomb_timeout += 1
-            return True
+            return row, column
         if self.bomb_timeout == 120:
             self.bomb.explode_bomb(minimap,obstacles)
             self.bomb = 0
